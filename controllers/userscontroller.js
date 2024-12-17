@@ -23,10 +23,7 @@ const loginUser = async (req, res) => {
     }
 
     // Step 2: Verify password
-    const isPasswordValid = await userModel.comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid username or password' });
-    }
+    const isPasswordValid = userModel.verifyUser(user, password);
 
     // Step 3: Generate a JWT Token
     const token = generateToken(user.id); // Assuming user ID is used in the token payload
@@ -34,7 +31,8 @@ const loginUser = async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       token: token,
-      user: { id: user.id, username: user.username }, // Optional: return user details
+      user: { id: user.id, 
+        email: user.email }, // Optional: return user details
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

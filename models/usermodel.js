@@ -1,5 +1,5 @@
 const db = require('../config/db.js');
-const bcrypt = require('bcryptjs');
+// const bcrypt = require('bcryptjs');
 
 // Fetch all users
 const getAllUsers = async () => {
@@ -22,16 +22,13 @@ const getUserByUsername = async (email) => {
 };
 
 // Compare plaintext password with hashed password
-const comparePassword = async (inputPassword, hashedPassword) => {
-    try {
-        return await bcrypt.compare(inputPassword, hashedPassword);
-    } catch (error) {
-        throw new Error('Error verifying password: ' + error.message);
-    }
+const verifyUser = (user, password) => {
+  return user.password === password; // Direct comparison
 };
+
 
 module.exports = {
     getAllUsers,
     getUserByUsername,
-    comparePassword,
+    verifyUser,
 };
