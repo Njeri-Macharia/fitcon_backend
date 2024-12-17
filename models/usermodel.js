@@ -12,9 +12,9 @@ const getAllUsers = async () => {
 };
 
 // Find a user by username
-const getUserByUsername = async (username) => {
+const getUserByUsername = async (email) => {
     try {
-        const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         return rows[0]; // Return the first user found
     } catch (error) {
         throw new Error('Error finding user: ' + error.message);
