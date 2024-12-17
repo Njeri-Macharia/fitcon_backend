@@ -26,9 +26,28 @@ const verifyUser = (user, password) => {
   return user.password === password; // Direct comparison
 };
 
+// get the user goals
+const getUserGoals = async (userId) => {
+  const [rows] = await db.query('SELECT * FROM goals WHERE user_id = ?', [userId]);
+  return rows; // Return the goals for the user
+};
+
+
+// get users classes
+const getUserClasses = async (userId) => {
+  const [rows] = await db.query(`
+      SELECT classes.* 
+      FROM classes
+      JOIN user_classes ON classes.id = user_classes.class_id
+      WHERE user_classes.user_id = ?
+  `, [userId]);
+  return rows; // Return the classes the user is enrolled in
+};
 
 module.exports = {
     getAllUsers,
     getUserByUsername,
     verifyUser,
+    getUserGoals,
+    getUserClasses
 };
