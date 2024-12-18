@@ -1,5 +1,5 @@
 const userModel = require('../models/usermodel.js');
-const { generateToken } = require('../config/jwt'); // Assuming JWT generation utility exists
+const jwt = require('jsonwebtoken');
 
 // Controller to get all users
 const Allusers = async (req, res) => {
@@ -11,31 +11,50 @@ const Allusers = async (req, res) => {
   }
 };
 
-// Controller for user login
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Step 1: Find user by username
-    const user = await userModel.getUserByUsername(email);
+    // Find user by username
+    const user = await userModel.verifyUser(email);
+
+    // Check if user exists
     if (!user) {
-      return res.status(400).json({ message: 'Invalid username or password' });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    // Step 2: Verify password
-    const isPasswordValid = userModel.verifyUser(user, password);
+    // Verify password (assuming you're skipping bcrypt for simplicity here)
+    const isPasswordValid = (password === user.password);
 
-    // Step 3: Generate a JWT Token
-    const token = generateToken(user.id); // Assuming user ID is used in the token payload
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
 
-    res.status(200).json({
-      message: 'Login successful',
+    // Fetch the user's goals and enrolled classes
+    const goals = await userModel.getUserGoals(user.id);
+    const classes = await userModel.getUserClasses(user.id);
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { email: user.email, id: user.id },
+      'your_jwt_secret', // Replace with your actual secret key
+      { expiresIn: '1h' }
+    );
+
+    // Respond with token, user data, goals, and classes
+    res.json({
+      message: "Login successful",
       token: token,
-      user: { id: user.id, 
-        email: user.email }, // Optional: return user details
+      user: {
+        email: user.email,
+        id: user.id,
+        goals: goals,
+        classes: classes
+      }
     });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: `Error during login: ${err.message}` });
   }
 };
 
